@@ -1,3 +1,16 @@
+<?php
+
+session_start();
+
+$name = $_SESSION['name'] ?? null;
+$alerts = $_SESSION['alerts'] ?? [];
+$active_form = $_SESSION['active_form'] ?? '';
+
+session_unset();
+
+if ($name !== null) $_SESSION['name'] = $name;
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -26,34 +39,50 @@
         <a href="#">Contact</a>
     </nav>
 
-    <div class="user-auth" >
-        <div class="profile-box">
-            <div class="avatar-circle">A</div>
-            <div class="dropdown">
-                <a href="#">My Account</a>
-                <a href="#">Logout</a>
+    <div class="user-auth">
+        <?php if (!empty($name)) : ?>
+            <div class="profile-box">
+                <div class="avatar-circle">
+                    <?= strtoupper($name[0]) ?>
+                </div>
+                <div class="dropdown">
+                    <a href="#">My Account</a>
+                    <a href="logout.php">Logout</a>
+                </div>
             </div>
-        </div>
-        <button type="button" class="login-btn-modal" style="display: none">Login</button>
+        <?php else: ?>
+            <button type="button" class="login-btn-modal">Login</button>
+        <?php endif; ?>
     </div>
 </header>
 <!--header-->
 
 <!--Hero-->
 <section>
-    <h1>Hello!</h1>
+    <h1>Hello! <?= $name ?? 'gys'; ?></h1>
 </section>
+<?php if (!empty($alerts)) : ?>
+    <?php foreach ($alerts as $alert) : ?>
+        <div class="alert-box">
+            <div class="alert <?= $alert['type']; ?>">
+                <i class="bxf <?= $alert['type'] == 'success' ? 'bx-check-circle' : 'bxs-x-circle' ?>"></i>
+                <span><?= $alert['message']; ?></span>
+            </div>
+        </div>
+    <?php endforeach; ?>
+<?php endif; ?>
+
 <!--Hero-->
 
 <!--Login Modal-->
-<div class="auth-modal">
+<div class="auth-modal <?= $active_form === 'register' ? 'show slide' : ($active_form === 'login' ? 'show' : ''); ?> ">
 
-    <button type="button" class="close-btn-modal" ><i class="bxf bx-x"></i></button>
+    <button type="button" class="close-btn-modal"><i class="bxf bx-x"></i></button>
 
     <!--  Login Form  -->
     <div class="form-box login">
         <h2>Login</h2>
-        <form action="#">
+        <form action="auth_process.php" method="POST">
             <div class="input-box">
                 <input name="email" type="email" placeholder="Email" required>
                 <i class="bxf bx-envelope"></i>
@@ -72,7 +101,7 @@
     <!--  Register Form  -->
     <div class="form-box register">
         <h2>Register</h2>
-        <form action="#">
+        <form action="auth_process.php" method="POST">
 
             <div class="input-box">
                 <input name="name" type="text" placeholder="Name" required>
